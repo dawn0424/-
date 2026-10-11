@@ -50,8 +50,8 @@ def ask_master(user_question):
         并附带比较容易理解的错误说明。
     """
 
-    # 检查你是否已经把 API_KEY 改成自己的真实 Key。
-    # 如果还是占位文字，说明还没有填写。
+    # 检查环境变量中是否已经配置 API Key。
+    # 如果没有配置，程序会给出明确提示。
     if not API_KEY:
         raise RuntimeError(
             "没有找到 DASHSCOPE_API_KEY。\n"
@@ -61,8 +61,7 @@ def ask_master(user_question):
     # 将 API Key 交给 dashscope 库。
     # 后面的 Generation.call() 会自动使用这个 Key 访问通义千问 API。
     dashscope.api_key = API_KEY
-    #这是一个全局变量，用来存聊天记录，程序不关它就在
-    chat_history=[]
+
     # messages 是发送给大模型的对话内容。
     # system 消息用于规定 AI 的身份和回答风格。
     # user 消息就是用户实际提出的问题。
