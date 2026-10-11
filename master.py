@@ -18,9 +18,9 @@ import dashscope
 from dashscope import Generation
 
 
-# 从环境变量 DASHSCOPE_API_KEY 中读取 API Key。
 # 不要把真实 API Key 直接写进代码，否则上传到 GitHub 后会泄露。
-API_KEY = os.getenv("DASHSCOPE_API_KEY", "")
+# 程序会在 ask_master() 函数中动态读取环境变量 DASHSCOPE_API_KEY。
+# 这样 Streamlit Secrets 更新后，程序可以读取到最新配置。
 
 
 # 这是系统提示词。
@@ -50,17 +50,22 @@ def ask_master(user_question):
         并附带比较容易理解的错误说明。
     """
 
+    # 每次调用 ask_master() 时，都重新从环境变量读取 API Key。
+    # 这样做比在文件开头只读取一次更稳妥：
+    # 如果你在 Streamlit Cloud 里刚刚修改了 Secrets，程序也能读到新值。
+    api_key = os.getenv("DASHSCOPE_API_KEY", "")
+
     # 检查环境变量中是否已经配置 API Key。
     # 如果没有配置，程序会给出明确提示。
-    if not API_KEY:
+    if not api_key:
         raise RuntimeError(
             "没有找到 DASHSCOPE_API_KEY。\n"
-            "请在运行环境的 Secrets 或环境变量中配置它。"
+            "请在 Streamlit Cloud 的 Secrets 中配置它。"
         )
 
     # 将 API Key 交给 dashscope 库。
     # 后面的 Generation.call() 会自动使用这个 Key 访问通义千问 API。
-    dashscope.api_key = API_KEY
+    dashscope.api_key = api_key
 
     # messages 是发送给大模型的对话内容。
     # system 消息用于规定 AI 的身份和回答风格。
