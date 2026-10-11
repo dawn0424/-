@@ -54,13 +54,31 @@ if prompt := st.chat_input("请输入你的问题（例如：我和他...）"):
         message_placeholder = st.empty()
         full_response = ""
         
-        # 获取回答
-        # 注意：这里直接调用了你 master.py 里的 ask_master 函数
-        response = ask_master(prompt) 
-        
-        # 模拟打字机效果（可选，为了更酷）
-        full_response = response
+        try:
+            # 获取回答。
+            # 注意：这里直接调用了 master.py 里的 ask_master 函数。
+            # ask_master 会负责调用通义千问 API，并返回 AI 的文字回答。
+            response = ask_master(prompt)
+
+            # 如果调用成功，就把 AI 返回的结果保存到 full_response。
+            full_response = response
+
+        except Exception as error:
+            # 如果调用失败，不让整个网页崩溃。
+            # 常见原因包括：
+            # 1. Streamlit Secrets 里没有配置 DASHSCOPE_API_KEY；
+            # 2. API Key 写错或已经失效；
+            # 3. 网络连接失败；
+            # 4. DashScope 服务返回错误。
+            full_response = (
+                "⚠️ 大师的云端法阵暂时失灵。\n\n"
+                f"错误原因：{error}\n\n"
+                "如果你是网站主人，请检查 Streamlit Secrets 中的 DASHSCOPE_API_KEY。"
+            )
+
+        # 把最终结果显示在网页上。
         message_placeholder.markdown(full_response)
     
-    # 3. 保存助手回复
+    # 3. 保存助手回复。
+    # 这样刷新前，在当前会话中还能看到聊天历史。
     st.session_state.messages.append({"role": "assistant", "content": full_response})
